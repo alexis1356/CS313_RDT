@@ -205,7 +205,7 @@ public class NetworkSimulator {
         if (rng.nextDouble() < lossProb) {
             numLost++;
             if (debugLevel > 0) {
-                System.out.format("        (%.2f) NetworkSimulator: losing packet.\n", simulationTime);
+                System.out.format("        (%.2f) NetworkSimulator: %s losing packet: (%s)\n", simulationTime, source.getName(), pkt);
             }
             return;
         }
@@ -216,7 +216,7 @@ public class NetworkSimulator {
             double x;
             if ((x = rng.nextDouble()) < .75) { // payload
                 if (debugLevel > 0) {
-                    System.out.format("        (%.2f) NetworkSimulator: corrupting packet payload.\n", simulationTime);
+                    System.out.format("        (%.2f) NetworkSimulator: %s corrupting packet payload: (%s)\n", simulationTime, source.getName(), pkt);
                 }
                 byte[] pktData = pktCopy.getData();
                 for (int i = (rng.nextInt(4) + 1); i >= 0; i--) {
@@ -224,12 +224,12 @@ public class NetworkSimulator {
                 }
             } else if (x < .875) { // seqnum
                 if (debugLevel > 0) {
-                    System.out.format("        (%.2f) NetworkSimulator: corrupting packet seqnum.\n", simulationTime);
+                    System.out.format("        (%.2f) NetworkSimulator: %s corrupting packet seqnum: (%s)\n", simulationTime, source.getName(), pkt);
                 }
                 pktCopy.setSeqnum(-99999); // should never be negative...
             } else { // acknum
                 if (debugLevel > 0) {
-                    System.out.format("        (%.2f) NetworkSimulator: corrupting packet acknum.\n", simulationTime);
+                    System.out.format("        (%.2f) NetworkSimulator: %s corrupting packet acknum: (%s)\n", simulationTime, source.getName(), pkt);
                 }
                 pktCopy.setAcknum(-99999); // should never be negative...
             }
