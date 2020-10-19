@@ -157,11 +157,15 @@ public class NetworkSimulator {
         if (debugLevel > 2) {
             System.out.format("        (%.2f) NetworkSimulator: STOP TIMER.\n", simulationTime);
         }
-        for (Event e : eventQueue) {
+
+       Iterator<Event> i = eventQueue.iterator();
+        while(i.hasNext()) {
+            Event e = i.next();
             if (e.getEvType() == EventType.TIMER_INTERRUPT && e.getEvEntity().equals(t)) {
                 removed = eventQueue.remove(e);
             }
         }
+
         if (!removed) {
             System.out.println("Warning: unable to cancel timer for " + t.getName() + " as it doesn't seem to exist.");
         }
