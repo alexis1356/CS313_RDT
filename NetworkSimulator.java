@@ -162,7 +162,8 @@ public class NetworkSimulator {
         while(i.hasNext()) {
             Event e = i.next();
             if (e.getEvType() == EventType.TIMER_INTERRUPT && e.getEvEntity().equals(t)) {
-                removed = eventQueue.remove(e);
+                i.remove();
+                removed = true;
             }
         }
 
