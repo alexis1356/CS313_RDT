@@ -1,3 +1,7 @@
+package src;
+
+import src.NetworkSimulator;
+
 public abstract class TransportLayer {
 
     String name;

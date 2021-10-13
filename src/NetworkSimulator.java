@@ -1,6 +1,9 @@
+package src;
+
 import java.io.ByteArrayOutputStream;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Random;
 
@@ -26,7 +29,7 @@ public class NetworkSimulator {
     int messagesSent;
 
     /**
-     * Create a new instance of the NetworkSimulator class.  This instance will
+     * Create a new instance of the src.NetworkSimulator class.  This instance will
      * send numMessages unique messages from a simulated layer 5 process with
      * probability of loss or corruption of those messages (at the network layer)
      * as defined by lossProb and corruptProb with a frequency based on lambda.
@@ -65,7 +68,7 @@ public class NetworkSimulator {
     }
 
     /**
-     * Attach a TransportLayer instance to this simulation as the designated
+     * Attach a src.TransportLayer instance to this simulation as the designated
      * "sender".  The sender designation is only relevant if bidirectional is
      * false.  In which case all layer 5 events will occur at the object passed
      * as an argument to this method.
@@ -77,7 +80,7 @@ public class NetworkSimulator {
     }
 
     /**
-     * Attach a TransportLayer instance to this simulation as the designated
+     * Attach a src.TransportLayer instance to this simulation as the designated
      * "receiver".  This designation is only relevant if the bidirectional
      * option was false at instantiation.  In that case the "receiver" object
      * will only encounter layer 3 events (data from the network).
@@ -146,16 +149,16 @@ public class NetworkSimulator {
     }
 
     /**
-     * A utility method for TransportLayer objects to stop a timer event (timeout)
-     * previously scheduled with startTimer(TransportLayer, double).  If no
+     * A utility method for src.TransportLayer objects to stop a timer event (timeout)
+     * previously scheduled with startTimer(src.TransportLayer, double).  If no
      * timer event was previously scheduled for 't' then this method will only
      * print a warning.
-     * @param t the TransportLayer instance that previously called startTimer(...)
+     * @param t the src.TransportLayer instance that previously called startTimer(...)
      */
     public void stopTimer(TransportLayer t) {
         boolean removed = false;
         if (debugLevel > 2) {
-            System.out.format("        (%.2f) NetworkSimulator: STOP TIMER.\n", simulationTime);
+            System.out.format("        (%.2f) src.NetworkSimulator: STOP TIMER.\n", simulationTime);
         }
 
        Iterator<Event> i = eventQueue.iterator();
@@ -173,18 +176,18 @@ public class NetworkSimulator {
     }
 
     /**
-     * A utility method for TransportLayer objects to start a timer event.  The
+     * A utility method for src.TransportLayer objects to start a timer event.  The
      * timeout event will occur at the current simulation time + the value of
      * the increment argument.  When this event is processed from the event queue
      * the result is a call to t.timerInterrupt()
-     * @param t the TransportLayer instance to notify on expiration of this timer
+     * @param t the src.TransportLayer instance to notify on expiration of this timer
      * @param increment the amount of time into the future at which this timer
      * should trigger.  A call to startTimer(t, 100.0) will cause a timeout at
      * 100.0 time units from the current simulation time.
      */
     public void startTimer(TransportLayer t, double increment) {
         if (debugLevel > 2) {
-            System.out.format("        (%.2f) NetworkSimulator: START TIMER.\n", simulationTime);
+            System.out.format("        (%.2f) src.NetworkSimulator: START TIMER.\n", simulationTime);
         }
         for (Event e : eventQueue) {
             if (e.getEvType() == EventType.TIMER_INTERRUPT && e.getEvEntity().equals(t)) {
@@ -196,21 +199,21 @@ public class NetworkSimulator {
     }
 
     /**
-     * A utility method used by TransportLayer objects to inject data into
+     * A utility method used by src.TransportLayer objects to inject data into
      * the network layer.  Data must be packetized and may be lost or corrupted
      * based on the probabilities given in lossProb and corruptProb when this
      * NetworkSimulation was instantiated.
-     * @param source the TransportLayer sending pkt.  The source field is used
+     * @param source the src.TransportLayer sending pkt.  The source field is used
      * to determine where the data goes when it arrives at the other end of the
      * simulated network.
-     * @param pkt the TransportLayerPacket to send via unreliable transport.
+     * @param pkt the src.TransportLayerPacket to send via unreliable transport.
      */
     public void sendToNetworkLayer(TransportLayer source, TransportLayerPacket pkt) {
         // network loses packets with a probability of lossProb
         if (rng.nextDouble() < lossProb) {
             numLost++;
             if (debugLevel > 0) {
-                System.out.format("        (%.2f) NetworkSimulator: %s losing packet: (%s)\n", simulationTime, source.getName(), pkt);
+                System.out.format("        (%.2f) src.NetworkSimulator: %s losing packet: (%s)\n", simulationTime, source.getName(), pkt);
             }
             return;
         }
@@ -221,7 +224,7 @@ public class NetworkSimulator {
             double x;
             if ((x = rng.nextDouble()) < .75) { // payload
                 if (debugLevel > 0) {
-                    System.out.format("        (%.2f) NetworkSimulator: %s corrupting packet payload: (%s)\n", simulationTime, source.getName(), pkt);
+                    System.out.format("        (%.2f) src.NetworkSimulator: %s corrupting packet payload: (%s)\n", simulationTime, source.getName(), pkt);
                 }
                 byte[] pktData = pktCopy.getData();
                 for (int i = (rng.nextInt(4) + 1); i >= 0; i--) {
@@ -229,12 +232,12 @@ public class NetworkSimulator {
                 }
             } else if (x < .875) { // seqnum
                 if (debugLevel > 0) {
-                    System.out.format("        (%.2f) NetworkSimulator: %s corrupting packet seqnum: (%s)\n", simulationTime, source.getName(), pkt);
+                    System.out.format("        (%.2f) src.NetworkSimulator: %s corrupting packet seqnum: (%s)\n", simulationTime, source.getName(), pkt);
                 }
                 pktCopy.setSeqnum(-99999); // should never be negative...
             } else { // acknum
                 if (debugLevel > 0) {
-                    System.out.format("        (%.2f) NetworkSimulator: %s corrupting packet acknum: (%s)\n", simulationTime, source.getName(), pkt);
+                    System.out.format("        (%.2f) src.NetworkSimulator: %s corrupting packet acknum: (%s)\n", simulationTime, source.getName(), pkt);
                 }
                 pktCopy.setAcknum(-99999); // should never be negative...
             }
@@ -247,20 +250,20 @@ public class NetworkSimulator {
         }
 
         if (debugLevel > 1) {
-            System.out.format("        (%.2f) NetworkSimulator.sendToNetworkLayer(%s, %s)\n", simulationTime, source.getName(), pktCopy.toString());
+            System.out.format("        (%.2f) src.NetworkSimulator.sendToNetworkLayer(%s, %s)\n", simulationTime, source.getName(), pktCopy.toString());
         }
         eventQueue.add(new Event((lastTime + (1 + 2 * rng.nextFloat())), EventType.FROM_LAYER3, (source.equals(sender) ? receiver : sender), pktCopy));
     }
 
     /**
-     * A utility method used by TransportLayer objects to deliver data to the
+     * A utility method used by src.TransportLayer objects to deliver data to the
      * simulated application layer.  This method just acts as a data sink.
-     * @param source the TransportLayer instance sending the traffic.
+     * @param source the src.TransportLayer instance sending the traffic.
      * @param data the data to be delivered.
      */
     public void sendToApplicationLayer(TransportLayer source, byte[] data) {
         if (debugLevel > 0) {
-            System.out.format("        (%.2f) NetworkSimulator.sendToApplicationLayer(%s, %s)\n", simulationTime, source.getName(), new String(data));
+            System.out.format("        (%.2f) src.NetworkSimulator.sendToApplicationLayer(%s, %s)\n", simulationTime, source.getName(), new String(data));
         }
     }
 
@@ -383,7 +386,7 @@ public class NetworkSimulator {
      */
     private void generateNextArrival() {
         if (debugLevel > 2) {
-            System.out.format("        (%.2f) NetworkSimulator: generateNextArrival()\n", simulationTime);
+            System.out.format("        (%.2f) src.NetworkSimulator: generateNextArrival()\n", simulationTime);
         }
         double x = lambda * rng.nextDouble() * 2;
         Event evt = new Event(simulationTime + x, EventType.FROM_LAYER5, (bidirectional && (rng.nextDouble() > 0.5)) ? receiver : sender);
