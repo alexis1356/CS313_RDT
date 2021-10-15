@@ -15,6 +15,13 @@ public class TransportLayerPacket {
         // complete this method
     }
 
+    public TransportLayerPacket(int sequm, int acknum, byte[] data){
+        setSeqnum(sequm);
+        setAcknum(acknum);
+        setData(data);
+    }
+
+
     public void setSeqnum(int seqnum) {
         this.seqnum = seqnum;
     }
@@ -22,6 +29,8 @@ public class TransportLayerPacket {
     public void setAcknum(int acknum) {
         this.acknum = acknum;
     }
+
+    public void setData(byte[] data) {this.data=data; }
 
     public byte[] getData() {
         return data;
