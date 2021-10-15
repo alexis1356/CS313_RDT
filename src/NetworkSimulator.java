@@ -211,7 +211,6 @@ public class NetworkSimulator {
      * @param pkt the src.TransportLayerPacket to send via unreliable transport.
      */
     public void sendToNetworkLayer(TransportLayer source, TransportLayerPacket pkt) {
-        System.out.println("received at transport layer!"); ///remove me!!!!!!!!!!!
         // network loses packets with a probability of lossProb
         if (rng.nextDouble() < lossProb) {
             numLost++;

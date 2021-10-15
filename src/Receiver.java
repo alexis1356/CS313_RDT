@@ -19,16 +19,15 @@ public class Receiver extends TransportLayer{
     @Override
     public void rdt_send(byte[] data) {
         TransportLayerPacket packet = new TransportLayerPacket(0,0,data);
-        //sim.sendToNetworkLayer(senderTL, packet); // senderTL not instantiated
-        System.out.println("Sent! in receiverTL");
+        simulator.sendToNetworkLayer(sender, packet); // senderTL not instantiated
+
     }
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         //        TODO
         byte data[] = pkt.getData();
-        System.out.println("Received! in receiverTL");
-        //sim.sendToApplicationLayer(receiverTL, data); // receiverTL not instatinated
+        simulator.sendToApplicationLayer(sender, data); // receiverTL not instatinated
 
 //        extract(pkt, data);
 //        deliver_data(data);

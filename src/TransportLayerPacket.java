@@ -18,13 +18,9 @@ public class TransportLayerPacket {
     }
 
     public TransportLayerPacket(TransportLayerPacket pkt) {
-
-    }
-
-    public TransportLayerPacket(int sequm, int acknum, byte[] data){
-        setSeqnum(sequm);
-        setAcknum(acknum);
-        setData(data);
+        this.seqnum = pkt.seqnum;
+        this.acknum = pkt.acknum;
+        this.data = pkt.data;
     }
 
 

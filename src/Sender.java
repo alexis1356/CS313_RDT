@@ -24,7 +24,6 @@ public class Sender extends TransportLayer{
         //which is sent to receiver
         TransportLayerPacket packet = new TransportLayerPacket(0,0,data);
         simulator.sendToNetworkLayer(receiver, packet);
-        System.out.println("Sent! in senderTL");
 
 //        packet = make_pkt(data);
 //        udt_send(packet);
@@ -42,8 +41,7 @@ public class Sender extends TransportLayer{
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         byte data[] = pkt.getData();
-        System.out.println("Received! in senderTL");
-        //sim.sendToApplicationLayer(senderTL, data); // receiverTL not instatinated
+        simulator.sendToApplicationLayer(receiver, data); // receiverTL not instatinated
 
     }
 
