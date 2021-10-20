@@ -23,12 +23,7 @@ public class Sender extends TransportLayer{
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
         }
-
-        //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
         sum ^=0xFFFFFFFF;
-
-        System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
-
         TransportLayerPacket packet = new TransportLayerPacket(0, 0, data, sum);
         simulator.sendToNetworkLayer(this, packet);
 

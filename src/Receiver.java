@@ -24,12 +24,24 @@ public class Receiver extends TransportLayer{
 
     }
 
+    public boolean isCorrupted(byte[] data, byte checksum){
+        byte sum = 0;
+        for (int i = 0; i < data.length; i++) {
+            sum += data[i];
+        }
+        sum += checksum;
+        if(sum == 0xFFFFFFFF){
+            return false;
+        }
+        else
+            return true;
+    }
+
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         //        TODO
         byte data[] = pkt.getData();
         byte checksum = pkt.getChecksum();
-        System.out.println(Integer.toBinaryString((checksum & 0xFF) + 0x100).substring(1));
         simulator.sendToApplicationLayer(this, data);
 
     }
