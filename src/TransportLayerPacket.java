@@ -38,4 +38,7 @@ public class TransportLayerPacket {
         return data;
     }
 
+    public int getAcknum() {
+        return acknum;
+    }
 }
