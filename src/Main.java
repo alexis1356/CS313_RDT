@@ -7,8 +7,6 @@ public class Main {
 
             Receiver receiver = new Receiver("receiver", sim);
             Sender sender = new Sender("sender", sim);
-            //sender.setReceiver(receiver);
-            //receiver.setSender(sender);
             // TODO: Set the sender   (sim.setSender)
             sim.setSender(sender);
 

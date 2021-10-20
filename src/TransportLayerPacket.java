@@ -28,6 +28,7 @@ public class TransportLayerPacket {
         this.seqnum = pkt.seqnum;
         this.acknum = pkt.acknum;
         this.data = pkt.data;
+        this.checksum = pkt.checksum;
     }
 
 
@@ -52,5 +53,5 @@ public class TransportLayerPacket {
     }
 
     public byte getChecksum() {
-        System.out.println(Integer.toBinaryString((checksum & 0xFF) + 0x100).substring(1)); return checksum;   }
+        return checksum;   }
 }

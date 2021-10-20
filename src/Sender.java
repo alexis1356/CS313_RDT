@@ -7,7 +7,6 @@ public class Sender extends TransportLayer{
     public Sender(String name, NetworkSimulator simulator)
     {
         super(name, simulator);
-        received = false;
     }
 
     @Override
@@ -28,7 +27,7 @@ public class Sender extends TransportLayer{
         //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
         sum ^=0xFFFFFFFF;
 
-        //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
+        System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
 
         TransportLayerPacket packet = new TransportLayerPacket(0, 0, data, sum);
         simulator.sendToNetworkLayer(this, packet);
@@ -38,10 +37,6 @@ public class Sender extends TransportLayer{
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         byte data[] = pkt.getData();
-        byte sum = 0;
-        for (int i = 0; i < data.length; i++) {
-            sum += data[i];
-        }
         //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
         //System.out.println(Integer.toBinaryString((pkt.getChecksum() & 0xFF) + 0x100).substring(1));
         simulator.sendToApplicationLayer(this, data);
