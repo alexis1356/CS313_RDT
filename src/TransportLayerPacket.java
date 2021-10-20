@@ -8,9 +8,16 @@ public class TransportLayerPacket {
     private int acknum;
 
     byte[] data;
+    byte checksum;
 
     // You may need extra methods
 
+    public TransportLayerPacket(int sequm, int acknum, byte[] data, byte checksum){
+        setSeqnum(sequm);
+        setAcknum(acknum);
+        setData(data);
+        setChecksum(checksum);
+    }
     public TransportLayerPacket(int sequm, int acknum, byte[] data){
         setSeqnum(sequm);
         setAcknum(acknum);
@@ -34,6 +41,8 @@ public class TransportLayerPacket {
 
     public void setData(byte[] data) {this.data=data; }
 
+    public void setChecksum(byte checksum) {this.checksum=checksum; }
+
     public byte[] getData() {
         return data;
     }
@@ -41,4 +50,7 @@ public class TransportLayerPacket {
     public int getAcknum() {
         return acknum;
     }
+
+    public byte getChecksum() {
+        System.out.println(Integer.toBinaryString((checksum & 0xFF) + 0x100).substring(1)); return checksum;   }
 }

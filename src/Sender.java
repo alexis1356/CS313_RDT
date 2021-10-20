@@ -19,29 +19,33 @@ public class Sender extends TransportLayer{
     public void rdt_send(byte[] data) {
         //takes an array of byte data and turns this into TransportLayerPacket
         //which is sent to receiver
-        TransportLayerPacket packet = new TransportLayerPacket(0, 0, data);
-        simulator.sendToNetworkLayer(this, packet);
-
         //calculate checksum
         byte sum = 0;
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
         }
-        //int number_of_bits =
-        //        (int)(Math.floor(Math.log(sum) / Math.log(2))) + 1;
-        System.out.println("Old " + sum);
-        //sum ^= ((1 << number_of_bits) - 1);
-        sum = (byte) ((byte) ~sum & 0xFFFFFFFF);
-        sum = (byte) ((byte) sum +1);
-        System.out.println(sum);
+
+        //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
+        sum ^=0xFFFFFFFF;
+
+        //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
+
+        TransportLayerPacket packet = new TransportLayerPacket(0, 0, data, sum);
+        simulator.sendToNetworkLayer(this, packet);
+
     }
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         byte data[] = pkt.getData();
+        byte sum = 0;
+        for (int i = 0; i < data.length; i++) {
+            sum += data[i];
+        }
+        //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
+        //System.out.println(Integer.toBinaryString((pkt.getChecksum() & 0xFF) + 0x100).substring(1));
         simulator.sendToApplicationLayer(this, data);
-        received = true;
-
+        //received = true;
     }
 
     @Override
