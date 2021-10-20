@@ -17,14 +17,10 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void rdt_send(byte[] data) {
-        simulator.sendToApplicationLayer(this, data);
-        //received = true;
-        TransportLayerPacket packet = new TransportLayerPacket(0,0,data, (byte) 0);
-        simulator.sendToNetworkLayer(sender, packet); // senderTL not instantiated
-
+      //don't need this for rdt 2.0
     }
 
-    public boolean isCorrupted(byte[] data, byte checksum){
+    public boolean isCorrupt(byte[] data, byte checksum){
         byte sum = 0;
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
@@ -39,19 +35,18 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        //        TODO
         byte data[] = pkt.getData();
         byte checksum = pkt.getChecksum();
-        simulator.sendToApplicationLayer(this, data);
-
-    }
-
-    public void extract(TransportLayerPacket pkt, byte[] data) {
-        //        TODO
-    }
-
-    public void deliver_data(byte[] data) {
-        //        TODO
+        System.out.println("Received: " + Integer.toBinaryString((checksum & 0xFF) + 0x100).substring(1));
+        if (isCorrupt(data,checksum)){ //packet data is corrupt
+            TransportLayerPacket nak = new TransportLayerPacket(0,0, data);
+            simulator.sendToNetworkLayer(this, nak);
+        }
+        else {
+            simulator.sendToApplicationLayer(this, data);
+            TransportLayerPacket ack = new TransportLayerPacket(0, 1, data);
+            simulator.sendToNetworkLayer(this, ack);
+        }
     }
 
     @Override

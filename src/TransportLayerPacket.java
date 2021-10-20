@@ -18,11 +18,6 @@ public class TransportLayerPacket {
         setData(data);
         setChecksum(checksum);
     }
-    public TransportLayerPacket(int sequm, int acknum, byte[] data){
-        setSeqnum(sequm);
-        setAcknum(acknum);
-        setData(data);
-    }
 
     public TransportLayerPacket(TransportLayerPacket pkt) {
         this.seqnum = pkt.seqnum;
@@ -30,6 +25,13 @@ public class TransportLayerPacket {
         this.data = pkt.data;
         this.checksum = pkt.checksum;
     }
+
+    public TransportLayerPacket(int sequm, int acknum, byte[] data) { // packet for sending ACK or NAK
+        setSeqnum(sequm);
+        setAcknum(acknum);
+        setData(data);
+    }
+
 
 
     public void setSeqnum(int seqnum) {
