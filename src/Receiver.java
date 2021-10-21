@@ -1,4 +1,5 @@
 package src;
+
 public class Receiver extends TransportLayer{
     private byte[] data;
     private Sender sender;
@@ -7,9 +8,6 @@ public class Receiver extends TransportLayer{
         super(name, simulator);
     }
 
-    public void setSender(Sender sender){
-        this.sender = sender;
-    }
     @Override
     public void init() {
         //        TODO
@@ -24,34 +22,66 @@ public class Receiver extends TransportLayer{
 
     }
 
-    public boolean isCorrupted(byte[] data, byte checksum){
+    private void deliverData(byte[] data) {
+        simulator.sendToApplicationLayer(this, data);
+    }
+
+    private void extract (TransportLayerPacket pkt, byte[] data) {
+        this.data = pkt.getData();
+        // TODO: remove the data from the packet ??
+//        pkt.setData(new byte[0]);
+    }
+
+    private void udtSend (TransportLayerPacket pkt) {
+        this.simulator.sendToNetworkLayer(this, pkt);
+    }
+
+
+
+    private boolean isCorrupted(byte[] data, byte checksum){
         byte sum = 0;
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
         }
+//        CRC32 crc = new CRC32();
+//        crc.update(data, 0, data.length);
+//        Long sum = crc.getValue();
+        System.out.println("checksum receiver: " + sum);
         sum += checksum;
         if(sum == 0xFFFFFFFF){
+            System.out.println("total sum not corrupted " + sum);
             return false;
         }
         else
+            System.out.println("total sum corrupted" + sum);
             return true;
     }
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         //        TODO
-        byte data[] = pkt.getData();
-        byte checksum = pkt.getChecksum();
-        simulator.sendToApplicationLayer(this, data);
-
-    }
-
-    public void extract(TransportLayerPacket pkt, byte[] data) {
-        //        TODO
-    }
-
-    public void deliver_data(byte[] data) {
-        //        TODO
+        if (isCorrupted(pkt.getData(), pkt.getChecksum())) {
+            // corrupted
+            if (pkt.getSeqnum() == 0) {
+                TransportLayerPacket sndpkt = new TransportLayerPacket(0, 0, pkt.getData());
+                udtSend(sndpkt);
+            } else if (pkt.getSeqnum() == 1) {
+                TransportLayerPacket sndpkt = new TransportLayerPacket(1, 0, pkt.getData());
+                udtSend(sndpkt);
+            }
+        } else {
+            // not corrupted
+            if (pkt.getSeqnum() == 0) {
+                extract(pkt, pkt.getData());
+                deliverData(pkt.getData());
+                TransportLayerPacket sndpkt = new TransportLayerPacket(0, 1, pkt.getData());
+                udtSend(sndpkt);
+            }
+                extract(pkt, pkt.getData());
+                deliverData(pkt.getData());
+                TransportLayerPacket sndpkt = new TransportLayerPacket(1, 1, pkt.getData());
+                udtSend(sndpkt);
+            }
     }
 
     @Override

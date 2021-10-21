@@ -52,6 +52,10 @@ public class TransportLayerPacket {
         return acknum;
     }
 
+    public int getSeqnum() {
+        return seqnum;
+    }
+
     public byte getChecksum() {
         return checksum;   }
 }

@@ -1,5 +1,8 @@
 package src;
 
+import java.nio.ByteBuffer;
+import java.util.zip.CRC32;
+
 public class Sender extends TransportLayer{
     private TransportLayerPacket packet;
     private boolean received;
@@ -24,7 +27,11 @@ public class Sender extends TransportLayer{
             sum += data[i];
         }
         sum ^=0xFFFFFFFF;
-        TransportLayerPacket packet = new TransportLayerPacket(0, 0, data, sum);
+//        CRC32 crc = new CRC32();
+//        crc.update(data, 0, data.length);
+//        Long checksum = crc.getValue();
+        System.out.println("checksum sender: " + sum);
+        TransportLayerPacket packet = new TransportLayerPacket(0, 0, data,  sum);
         simulator.sendToNetworkLayer(this, packet);
 
     }
@@ -32,10 +39,19 @@ public class Sender extends TransportLayer{
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         byte data[] = pkt.getData();
+        if (pkt.getAcknum() == 0) {
+            //NAK
+            System.out.println("Resend " + pkt.getChecksum());
+            simulator.sendToNetworkLayer(this, pkt);
+//            simulator.sendToApplicationLayer(this, data);
+        } else {
+            //ACK
+            System.out.println("ACK");
+
+        }
         //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
         //System.out.println(Integer.toBinaryString((pkt.getChecksum() & 0xFF) + 0x100).substring(1));
-        simulator.sendToApplicationLayer(this, data);
-        //received = true;
+
     }
 
     @Override
