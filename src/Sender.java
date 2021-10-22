@@ -6,8 +6,7 @@ public class Sender extends TransportLayer {
     private int waitsFor;
     private boolean waiting;
 
-    public Sender(String name, NetworkSimulator simulator)
-    {
+    public Sender(String name, NetworkSimulator simulator) {
         super(name, simulator);
     }
 
@@ -19,12 +18,16 @@ public class Sender extends TransportLayer {
         waiting = false;
     }
 
+    /**
+     * Takes an array of bytes and packs it into TransportLayerPacket
+     * which is sent to receiver via network layer
+     *
+     * @param data to be sent to receiver
+     */
     @Override
     public void rdt_send(byte[] data) {
-        //takes an array of byte data and turns this into TransportLayerPacket
-        //which is sent to receiver
         //how to stop sending
-        if(!waiting) {
+        if (!waiting) {
 //        if (waitsFor == seqnum) {
             byte sum = checksum(data);
             System.out.println("Sender: checksum " + sum);
@@ -40,16 +43,28 @@ public class Sender extends TransportLayer {
 
     }
 
+    /**
+     * Calculates checksum
+     *
+     * @param data the data to be sent
+     * @return data array's sum with its bits flipped
+     */
     private byte checksum(byte[] data) {
         //calculate checksum
         byte sum = 0;
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
         }
-        sum ^=0xFFFFFFFF;
+        sum ^= 0xFFFFFFFF;
         return sum;
     }
 
+    /**
+     * Switches number between 1 and 0
+     *
+     * @param num current value
+     * @return opposite value
+     */
     private int switchNum(int num) {
         if (num == 0)
             return 1;
@@ -57,7 +72,12 @@ public class Sender extends TransportLayer {
             return 0;
     }
 
-
+    /**
+     * Receives packet from receiver and performs different
+     * actions depending on retrieved acknowledgement number
+     *
+     * @param pkt the src.TransportLayerPacket received via unreliable transport
+     */
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         if (waitsFor != pkt.getAcknum() || isCorrupted(pkt.getData(), pkt.getChecksum())) {
@@ -116,22 +136,31 @@ public class Sender extends TransportLayer {
 //        }
     }
 
-    private boolean isCorrupted(byte[] data, byte checksum){
+    /**
+     * Identifies if received data is corrupted
+     *
+     * @param data     received data array
+     * @param checksum received checksum
+     * @return true if data is corrupted, otherwise false
+     */
+    private boolean isCorrupted(byte[] data, byte checksum) {
         byte sum = 0;
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
         }
         System.out.println("Sender checksum: " + sum);
         sum += checksum;
-        if(sum == 0xFFFFFFFF){
+        if (sum == 0xFFFFFFFF) {
             System.out.println("Sender: total sum not corrupted " + sum);
             return false;
-        }
-        else
+        } else
             System.out.println("Sender: total sum corrupted " + sum);
         return true;
     }
 
+    /**
+     * Timer interrupts sending process
+     */
     @Override
     public void timerInterrupt() {
         //        TODO - retransmit
