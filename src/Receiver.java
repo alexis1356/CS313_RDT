@@ -20,7 +20,7 @@ public class Receiver extends TransportLayer{
     public void rdt_send(byte[] data) {
         if (packet.getSeqnum() == waitsFor) {
             simulator.sendToApplicationLayer(this, data);
-            System.out.println("Receiver: Sent to application layer");
+            System.out.println("Receiver: Send to application layer");
         }
 
         //received = true;
@@ -29,25 +29,27 @@ public class Receiver extends TransportLayer{
 
     }
 
-
-    private void udtSend (TransportLayerPacket pkt) {
-        this.simulator.sendToNetworkLayer(this, pkt);
-    }
-
     private boolean isCorrupted(byte[] data, byte checksum){
         byte sum = 0;
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
         }
-        System.out.println("checksum receiver: " + sum);
+        System.out.println("Receiver checksum: " + sum);
         sum += checksum;
         if(sum == 0xFFFFFFFF){
-            System.out.println("total sum not corrupted " + sum);
+            System.out.println("Receiver: total sum not corrupted " + sum);
             return false;
         }
         else
-            System.out.println("total sum corrupted" + sum);
+            System.out.println("Receiver: total sum corrupted " + sum);
             return true;
+    }
+
+    private int switchNum(int num) {
+        if (num == 0)
+            return 1;
+        else
+            return 0;
     }
 
     @Override
@@ -57,15 +59,20 @@ public class Receiver extends TransportLayer{
         if (!isCorrupted(pkt.getData(), pkt.getChecksum()) &&
         pkt.getSeqnum() == waitsFor) {
             rdt_send(pkt.getData());
-            TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getSeqnum(), pkt.getSeqnum(), pkt.getData());
+            TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getAcknum(), pkt.getSeqnum(), pkt.getData(), pkt.getChecksum());
             simulator.sendToNetworkLayer(this, sndpkt);
+            waitsFor = switchNum(waitsFor);
+            System.out.println("Send back");
+            System.out.println("Receiver: rdt_receive case not corrupted and matching " + waitsFor);
         }
-        if (isCorrupted(pkt.getData(), pkt.getChecksum()) ||
+        else if (isCorrupted(pkt.getData(), pkt.getChecksum()) ||
                 pkt.getSeqnum() != waitsFor) {
-            TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getSeqnum(), pkt.getSeqnum(), pkt.getData());
+            TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getAcknum(), pkt.getSeqnum(), pkt.getData(), pkt.getChecksum());
             simulator.sendToNetworkLayer(this, sndpkt);
             System.out.println("Send back");
+            System.out.println("Receiver: rdt_receive case corrupted or not matching " + waitsFor);
         }
+
 //        if (isCorrupted(pkt.getData(), pkt.getChecksum())) {
 //            // corrupted
 //            if (pkt.getSeqnum() == 0) {
