@@ -18,6 +18,13 @@ public class TransportLayerPacket {
         setData(data);
         setChecksum(checksum);
     }
+
+    public TransportLayerPacket(int sequm, byte[] data, byte checksum){
+        setSeqnum(sequm);
+        setData(data);
+        setChecksum(checksum);
+    }
+
     public TransportLayerPacket(int sequm, int acknum, byte[] data){
         setSeqnum(sequm);
         setAcknum(acknum);

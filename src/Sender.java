@@ -1,11 +1,8 @@
 package src;
 
-import java.nio.ByteBuffer;
-import java.util.zip.CRC32;
-
-public class Sender extends TransportLayer{
+public class Sender extends TransportLayer {
     private TransportLayerPacket packet;
-    private boolean received;
+    private int seqnum;
 
     public Sender(String name, NetworkSimulator simulator)
     {
@@ -15,6 +12,7 @@ public class Sender extends TransportLayer{
     @Override
     public void init() {
         //        TODO
+        seqnum = 0;
     }
 
     @Override
@@ -27,35 +25,69 @@ public class Sender extends TransportLayer{
             sum += data[i];
         }
         sum ^=0xFFFFFFFF;
-//        CRC32 crc = new CRC32();
-//        crc.update(data, 0, data.length);
-//        Long checksum = crc.getValue();
         System.out.println("checksum sender: " + sum);
-        TransportLayerPacket packet = new TransportLayerPacket(0, 0, data,  sum);
+        this.packet = new TransportLayerPacket(seqnum, data,  sum);
         simulator.sendToNetworkLayer(this, packet);
-
+        // start a timer
+        simulator.startTimer(this, 10);
     }
+
+    private int switchNum(int num) {
+        if (num == 0)
+            return 1;
+        else
+            return 0;
+    }
+
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        byte data[] = pkt.getData();
-        if (pkt.getAcknum() == 0) {
-            //NAK
-            System.out.println("Resend " + pkt.getChecksum());
-            simulator.sendToNetworkLayer(this, pkt);
-//            simulator.sendToApplicationLayer(this, data);
-        } else {
-            //ACK
-            System.out.println("ACK");
+        if (pkt.getAcknum() != seqnum) {
 
         }
-        //System.out.println(Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
-        //System.out.println(Integer.toBinaryString((pkt.getChecksum() & 0xFF) + 0x100).substring(1));
+        if (pkt.getAcknum() == seqnum) {
+            simulator.stopTimer(this);
+            seqnum = switchNum(seqnum);
+//            rdt_send(pkt.getData());
+        }
 
+//        byte data[] = pkt.getData();
+//        if (pkt.getAcknum() == 0) {
+//            //NAK
+//            System.out.println("Resend NAK " + pkt.getChecksum());
+//            simulator.sendToNetworkLayer(this, pkt);
+//            // start a timer
+//            simulator.startTimer(this, 100);
+//
+////            simulator.sendToApplicationLayer(this, data);
+//        } else {
+//            //ACK
+//            System.out.println("ACK");
+//            simulator.stopTimer(this);
+//            if (pkt.getSeqnum() == 0) {
+//                seqnum = 1;
+//                System.out.println("Seq num switch to 1");
+//            } else {
+//                seqnum = 0;
+//                System.out.println("Seq num switch to 0");
+//            }
+//            //stop timer
+//        }
+//
+//        if (seqnum == pkt.getAcknum()) {
+//            if (seqnum == 0)
+//                seqnum = 1;
+//            else
+//                seqnum = 0;
+//        }
     }
 
     @Override
     public void timerInterrupt() {
-        //        TODO
+        //        TODO - retransmit
+        simulator.sendToNetworkLayer(this, packet);
+        System.out.println("resend");
+        // start a timer
+        simulator.startTimer(this, 10);
     }
 }
