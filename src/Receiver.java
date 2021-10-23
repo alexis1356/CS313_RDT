@@ -1,5 +1,7 @@
 package src;
 
+import java.util.Arrays;
+
 public class Receiver extends TransportLayer{
     private byte[] data;
     private Sender sender;
@@ -20,7 +22,7 @@ public class Receiver extends TransportLayer{
     public void rdt_send(byte[] data) {
         if (packet.getSeqnum() == waitsFor) {
             simulator.sendToApplicationLayer(this, data);
-            System.out.println("Receiver: Send to application layer");
+            System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
         }
 
         //received = true;
@@ -62,14 +64,14 @@ public class Receiver extends TransportLayer{
             TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getAcknum(), pkt.getSeqnum(), pkt.getData(), pkt.getChecksum());
             simulator.sendToNetworkLayer(this, sndpkt);
             waitsFor = switchNum(waitsFor);
-            System.out.println("Send back");
+            System.out.println("Send back " + Arrays.toString(pkt.getData()));
             System.out.println("Receiver: rdt_receive case not corrupted and matching " + waitsFor);
         }
         else if (isCorrupted(pkt.getData(), pkt.getChecksum()) ||
                 pkt.getSeqnum() != waitsFor) {
             TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getAcknum(), pkt.getSeqnum(), pkt.getData(), pkt.getChecksum());
             simulator.sendToNetworkLayer(this, sndpkt);
-            System.out.println("Send back");
+            System.out.println("Send back " + Arrays.toString(pkt.getData()));
             System.out.println("Receiver: rdt_receive case corrupted or not matching " + waitsFor);
         }
 
@@ -105,7 +107,5 @@ public class Receiver extends TransportLayer{
     }
 
     @Override
-    public void timerInterrupt() {
-        //        TODO
-    }
+    public void timerInterrupt() {}
 }

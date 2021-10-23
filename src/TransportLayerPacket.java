@@ -34,7 +34,7 @@ public class TransportLayerPacket {
     public TransportLayerPacket(TransportLayerPacket pkt) {
         this.seqnum = pkt.seqnum;
         this.acknum = pkt.acknum;
-        this.data = pkt.data;
+        this.data = pkt.data.clone();
         this.checksum = pkt.checksum;
     }
 
