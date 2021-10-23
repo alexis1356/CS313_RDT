@@ -86,7 +86,7 @@ public class NetworkSimulator {
      * "receiver".  This designation is only relevant if the bidirectional
      * option was false at instantiation.  In that case the "receiver" object
      * will only encounter layer 3 events (data from the network).
-     * @param receiver
+     * @param receiver the "receiver" side of the simulation.
      */
     public void setReceiver(TransportLayer receiver) {
         this.receiver = receiver;
