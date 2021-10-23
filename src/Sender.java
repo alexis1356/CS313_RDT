@@ -18,7 +18,6 @@ public class Sender extends TransportLayer {
 
     @Override
     public void init() {
-        //        TODO
         seqnum = 0;
         waitsFor = 0;
         waiting = false;
@@ -26,13 +25,8 @@ public class Sender extends TransportLayer {
 
     @Override
     public void rdt_send(byte[] data) {
-        //put it in a queue
         //save the data - losing packets TODO: ask if it is needed
-        //check somewhere if the queue is empty to send remaining packets in rdt_receive
 
-        //takes an array of byte data and turns this into TransportLayerPacket
-        //which is sent to receiver
-        //how to stop sending
         if(!waiting) {
             //send the 1st
             byte sum = checksum(data);
@@ -77,10 +71,10 @@ public class Sender extends TransportLayer {
             System.out.println("Sender: " + Arrays.toString(pkt.getData()));
             System.out.println("Sender: stop timer and switch seqnum to " + seqnum + " in rdt_receive.");
             waiting = false;
+            System.out.println("______________________________");
             if(!allData.isEmpty()) {
                 rdt_send(allData.poll());
             }
-            System.out.println("______________________________");
         }
     }
 

@@ -12,7 +12,6 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void init() {
-        //        TODO
         waitsFor = 0;
     }
 
@@ -49,21 +48,12 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        //        TODO
         this.packet = pkt;
         if (!isCorrupted(pkt.getData(), pkt.getChecksum()) &&
         pkt.getSeqnum() == waitsFor) {
             rdt_send(pkt.getData());
-//            TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getAcknum(), pkt.getSeqnum(), pkt.getData(), pkt.getChecksum());
-//            simulator.sendToNetworkLayer(this, sndpkt);
             waitsFor = switchNum(waitsFor);
-//            System.out.println("Send back " + Arrays.toString(pkt.getData()));
-//            System.out.println("Receiver: rdt_receive case not corrupted and matching " + waitsFor);
         }
-//        else if (isCorrupted(pkt.getData(), pkt.getChecksum()) ||
-//                pkt.getSeqnum() != waitsFor) {
-//
-//        }
         TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getAcknum(), pkt.getSeqnum(), pkt.getData(), pkt.getChecksum());
         simulator.sendToNetworkLayer(this, sndpkt);
         System.out.println("Send back " + Arrays.toString(pkt.getData()));
