@@ -63,10 +63,8 @@ public class Sender extends TransportLayer {
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        if (waitsFor != pkt.getAcknum() || isCorrupted(pkt.getChecksum())) {
-            //do nothing
-            System.out.println("A");
-        } else if (waitsFor == pkt.getAcknum() && !isCorrupted(pkt.getChecksum())) {
+        //getAckNum should be the one that the receiver was waiting for and acknowledges it
+     if (waitsFor == pkt.getAcknum() && !isCorrupted(pkt.getChecksum())) {
             simulator.stopTimer(this);
             seqnum = switchNum(seqnum);
             waitsFor = switchNum(waitsFor);
@@ -82,10 +80,10 @@ public class Sender extends TransportLayer {
 
     private boolean isCorrupted(byte receivedChecksum) {
         if (receivedChecksum == packet.getChecksum()) {
-            System.out.println("Sender: checksum not corrupted " );
+            System.out.println("Sender: checksum not corrupted ");
             return false;
         } else {
-            System.out.println("Sender: checksum corrupted " );
+            System.out.println("Sender: checksum corrupted ");
             return true;
         }
     }
