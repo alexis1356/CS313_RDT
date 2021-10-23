@@ -29,14 +29,12 @@ public class Sender extends TransportLayer {
         //put it in a queue
         //save the data - losing packets TODO: ask if it is needed
         //check somewhere if the queue is empty to send remaining packets in rdt_receive
-//        allData.add(data);
 
         //takes an array of byte data and turns this into TransportLayerPacket
         //which is sent to receiver
         //how to stop sending
         if(!waiting) {
             //send the 1st
-//        if (waitsFor == seqnum) {
             byte sum = checksum(data);
             System.out.println("Sender: checksum " + sum);
             this.packet = new TransportLayerPacket(seqnum, data, sum);
