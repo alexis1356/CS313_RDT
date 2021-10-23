@@ -11,8 +11,7 @@ public class Sender extends TransportLayer {
     private boolean waiting;
     private Queue<byte[]> allData = new LinkedList<>();
 
-    public Sender(String name, NetworkSimulator simulator)
-    {
+    public Sender(String name, NetworkSimulator simulator) {
         super(name, simulator);
     }
 
@@ -26,17 +25,21 @@ public class Sender extends TransportLayer {
     @Override
     public void rdt_send(byte[] data) {
         //save the data - losing packets TODO: ask if it is needed
-
-        if(!waiting) {
-            //send the 1st
+        //send the 1st or next packet
+        if (!waiting) {
+            //calculates checksum
             byte sum = checksum(data);
             System.out.println("Sender: checksum " + sum);
+            //creates the packet and assigns for 1st package a seq number 0
             this.packet = new TransportLayerPacket(seqnum, data, sum);
+            //sending the packet to the network layer
             simulator.sendToNetworkLayer(this, packet);
             System.out.println("Sender: initial sending " + Arrays.toString(packet.getData()));
+            //start timer
             simulator.startTimer(this, 100);
             waiting = true;
         } else {
+            //if it is waiting it adds the new data to a queue that will be sent later
             allData.add(data);
         }
     }
@@ -47,7 +50,7 @@ public class Sender extends TransportLayer {
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
         }
-        sum ^=0xFFFFFFFF;
+        sum ^= 0xFFFFFFFF;
         return sum;
     }
 
@@ -60,11 +63,10 @@ public class Sender extends TransportLayer {
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        if (waitsFor != pkt.getAcknum() || isCorrupted(pkt.getData(), pkt.getChecksum())) {
+        if (waitsFor != pkt.getAcknum() || isCorrupted(pkt.getChecksum())) {
             //do nothing
             System.out.println("A");
-        }
-        if (waitsFor == pkt.getAcknum() && !isCorrupted(pkt.getData(), pkt.getChecksum())) {
+        } else if (waitsFor == pkt.getAcknum() && !isCorrupted(pkt.getChecksum())) {
             simulator.stopTimer(this);
             seqnum = switchNum(seqnum);
             waitsFor = switchNum(waitsFor);
@@ -72,26 +74,20 @@ public class Sender extends TransportLayer {
             System.out.println("Sender: stop timer and switch seqnum to " + seqnum + " in rdt_receive.");
             waiting = false;
             System.out.println("______________________________");
-            if(!allData.isEmpty()) {
+            if (!allData.isEmpty()) {
                 rdt_send(allData.poll());
             }
         }
     }
 
-    private boolean isCorrupted(byte[] data, byte checksum){
-        byte sum = 0;
-        for (int i = 0; i < data.length; i++) {
-            sum += data[i];
-        }
-        System.out.println("Sender checksum: " + sum);
-        sum += checksum;
-        if(sum == 0xFFFFFFFF){
-            System.out.println("Sender: total sum not corrupted " + sum);
+    private boolean isCorrupted(byte receivedChecksum) {
+        if (receivedChecksum == packet.getChecksum()) {
+            System.out.println("Sender: checksum not corrupted " );
             return false;
+        } else {
+            System.out.println("Sender: checksum corrupted " );
+            return true;
         }
-        else
-            System.out.println("Sender: total sum corrupted " + sum);
-        return true;
     }
 
     @Override

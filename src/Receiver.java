@@ -48,16 +48,21 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        this.packet = pkt;
+        //assign local packet to the arriving packet
         if (!isCorrupted(pkt.getData(), pkt.getChecksum()) &&
         pkt.getSeqnum() == waitsFor) {
-            rdt_send(pkt.getData());
-            waitsFor = switchNum(waitsFor);
+            this.packet = pkt;
+            TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData(), packet.getChecksum());
+            simulator.sendToNetworkLayer(this, sndpkt);
+            rdt_send(pkt.getData()); //we sent the packet ot the application layer
+            waitsFor = switchNum(waitsFor); //we wait for the next packet with seq number - 1
         }
-        TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getAcknum(), pkt.getSeqnum(), pkt.getData(), pkt.getChecksum());
-        simulator.sendToNetworkLayer(this, sndpkt);
-        System.out.println("Send back " + Arrays.toString(pkt.getData()));
-        System.out.println("Receiver: rdt_receive case corrupted or not matching " + waitsFor);
+        else if(isCorrupted(pkt.getData(),pkt.getChecksum()) || pkt.getSeqnum() != waitsFor){
+            TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getSeqnum(), switchNum(waitsFor), pkt.getData(), pkt.getChecksum());
+            simulator.sendToNetworkLayer(this, sndpkt);
+            System.out.println("Send back " + Arrays.toString(pkt.getData()));
+            System.out.println("Receiver: rdt_receive case corrupted or not matching " + waitsFor);
+        }
     }
 
     @Override
