@@ -21,7 +21,7 @@ public class Sender extends TransportLayer {
         seqnum = 0;
 
     }
-
+//
     @Override
     public void rdt_send(byte[] data) {
         //save the data - losing packets TODO: ask if it is needed

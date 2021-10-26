@@ -23,6 +23,8 @@ public class Receiver extends TransportLayer{
             simulator.sendToApplicationLayer(this, data);
             System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
         }
+        //expectedSeqnum =0;
+        //packet = new TransportLayerPacket (0,packet.getAcknum(),packet.getData(), packet.getChecksum());
     }
 
     private boolean isCorrupted(byte[] data, byte checksum){
@@ -39,7 +41,7 @@ public class Receiver extends TransportLayer{
         else
             System.out.println("Receiver: total sum corrupted " + sum);
             return true;
-    }
+    }//
 
     private int switchNum(int num) {
         if (num == 0)
