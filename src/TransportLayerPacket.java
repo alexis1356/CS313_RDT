@@ -19,10 +19,22 @@ public class TransportLayerPacket {
         setChecksum(checksum);
     }
 
+    public TransportLayerPacket(int sequm, byte[] data, byte checksum){
+        setSeqnum(sequm);
+        setData(data);
+        setChecksum(checksum);
+    }
+
+    public TransportLayerPacket(int sequm, int acknum, byte[] data){
+        setSeqnum(sequm);
+        setAcknum(acknum);
+        setData(data);
+    }
+
     public TransportLayerPacket(TransportLayerPacket pkt) {
         this.seqnum = pkt.seqnum;
         this.acknum = pkt.acknum;
-        this.data = pkt.data;
+        this.data = pkt.data.clone();
         this.checksum = pkt.checksum;
     }
 
@@ -52,6 +64,10 @@ public class TransportLayerPacket {
 
     public int getAcknum() {
         return acknum;
+    }
+
+    public int getSeqnum() {
+        return seqnum;
     }
 
     public byte getChecksum() {

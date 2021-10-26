@@ -1,64 +1,97 @@
 package src;
 
-public class Sender extends TransportLayer{
-    private TransportLayerPacket packet;
-    // state 1 - means we are waiting from a call from above - can send packets
-    // state 2 - means we are waiting for an ACk or NAK - can't send packets
-    private int currentState = 1; //int of what state we are currently on - see above for what this means
-    private int nextData = 0; //index of the next data to be sent
-    private int nextFreeIndex = 0; // index of next free index in dataQueue
-    private byte[][] dataQueue = new byte[10][]; //list of data that needs to be sent;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 
-    public Sender(String name, NetworkSimulator simulator)
-    {
+public class Sender extends TransportLayer {
+    private TransportLayerPacket packet;
+    private int seqnum;
+    private int waitsFor;
+    private boolean waiting;
+    private Queue<byte[]> allData = new LinkedList<>();
+
+    public Sender(String name, NetworkSimulator simulator) {
         super(name, simulator);
     }
 
     @Override
     public void init() {
-        currentState = 1; //initialises current state to 1
-        //        TODO
+        seqnum = 0;
+        waitsFor = 0;
+        waiting = false;
     }
 
     @Override
-    public void rdt_send(byte[] data){
-        switch (currentState){
-            case 1: // we can send packets
-                byte sum = 0;
-                for (int i = 0; i < data.length; i++) {
-                    sum += data[i];
-                }
-                sum ^= 0xFFFFFFFF;
-                packet = new TransportLayerPacket(0, 0, data, sum);
-                simulator.sendToNetworkLayer(this, packet);
-                System.out.println("Sent: " + Integer.toBinaryString((sum & 0xFF) + 0x100).substring(1));
-                currentState =2;
-                break;
-            case 2: // we are waiting for acknowledgment
-                    dataQueue[nextFreeIndex] = data;
-                    nextFreeIndex++;
+    public void rdt_send(byte[] data) {
+        //save the data - losing packets TODO: ask if it is needed
+        //send the 1st or next packet
+        if (!waiting) {
+            //calculates checksum
+            byte sum = checksum(data);
+            System.out.println("Sender: checksum " + sum);
+            //creates the packet and assigns for 1st package a seq number 0
+            this.packet = new TransportLayerPacket(seqnum, data, sum);
+            //sending the packet to the network layer
+            simulator.sendToNetworkLayer(this, packet);
+            System.out.println("Sender: initial sending " + Arrays.toString(packet.getData()));
+            //start timer
+            simulator.startTimer(this, 100);
+            waiting = true;
+        } else {
+            //if it is waiting it adds the new data to a queue that will be sent later
+            allData.add(data);
         }
+    }
+
+    private byte checksum(byte[] data) {
+        //calculate checksum
+        byte sum = 0;
+        for (int i = 0; i < data.length; i++) {
+            sum += data[i];
+        }
+        sum ^= 0xFFFFFFFF;
+        return sum;
+    }
+
+    private int switchNum(int num) {
+        if (num == 0)
+            return 1;
+        else
+            return 0;
     }
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        if (pkt.getAcknum() == 0) {
-            System.out.println("Received NAK");
-            simulator.sendToNetworkLayer(this, packet);
-            currentState=2;
-        }
-        else {
-            System.out.println("Received ACK");
-            currentState=1;
-            if (pkt.getData() != dataQueue[nextData] && dataQueue[nextData] != null) {
-                rdt_send(dataQueue[nextData]);
-                nextData++;
+        //getAckNum should be the one that the receiver was waiting for and acknowledges it
+     if (waitsFor == pkt.getAcknum() && !isCorrupted(pkt.getChecksum())) {
+            simulator.stopTimer(this);
+            seqnum = switchNum(seqnum);
+            waitsFor = switchNum(waitsFor);
+            System.out.println("Sender: " + Arrays.toString(pkt.getData()));
+            System.out.println("Sender: stop timer and switch seqnum to " + seqnum + " in rdt_receive.");
+            waiting = false;
+            System.out.println("______________________________");
+            if (!allData.isEmpty()) {
+                rdt_send(allData.poll());
             }
+        }
+    }
+
+    private boolean isCorrupted(byte receivedChecksum) {
+        if (receivedChecksum == packet.getChecksum()) {
+            System.out.println("Sender: checksum not corrupted ");
+            return false;
+        } else {
+            System.out.println("Sender: checksum corrupted ");
+            return true;
         }
     }
 
     @Override
     public void timerInterrupt() {
-        //        TODO
+        simulator.sendToNetworkLayer(this, packet);
+        System.out.println("Sender: timeout, resend " + packet);
+        simulator.startTimer(this, 100);
     }
 }
