@@ -3,7 +3,7 @@ package src;
 public class Main {
 
         public static void main(String[] args) {
-            NetworkSimulator sim = new NetworkSimulator(2, 0, 0.5, 10.0, false, 1);
+            NetworkSimulator sim = new NetworkSimulator(5, 0, 0, 10.0, true, 1);
 
             Receiver receiver = new Receiver("receiver", sim);
             Sender sender = new Sender("sender", sim);
