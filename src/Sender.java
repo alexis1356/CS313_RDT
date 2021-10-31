@@ -64,11 +64,10 @@ public class Sender extends TransportLayer {
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         //getAckNum should be the one that the receiver was waiting for and acknowledges it
-     if (waitsFor == pkt.getAcknum() && !isCorrupted(pkt.getChecksum())) {
+        if (waitsFor == pkt.getAcknum() && !isCorrupted(pkt.getChecksum()) && inOrderData(pkt.getData())) {
             simulator.stopTimer(this);
             seqnum = switchNum(seqnum);
             waitsFor = switchNum(waitsFor);
-            System.out.println("Sender: " + Arrays.toString(pkt.getData()));
             System.out.println("Sender: stop timer and switch seqnum to " + seqnum + " in rdt_receive.");
             waiting = false;
             System.out.println("______________________________");
@@ -76,6 +75,19 @@ public class Sender extends TransportLayer {
                 rdt_send(allData.poll());
             }
         }
+    }
+
+    private boolean inOrderData(byte[] recievedData){
+        byte[] orginalData = packet.getData();
+        if (recievedData.length != orginalData.length){
+            return false;
+        }
+        for (int i=0; i<recievedData.length; i++){
+            if (recievedData[i] != orginalData[i]){
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isCorrupted(byte receivedChecksum) {
