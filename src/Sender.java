@@ -35,6 +35,7 @@ public class Sender extends TransportLayer {
             //sending the packet to the network layer
             simulator.sendToNetworkLayer(this, packet);
             System.out.println("Sender: initial sending " + Arrays.toString(packet.getData()));
+            System.out.println("Seqnum of: " +packet.getSeqnum());
             //start timer
             simulator.startTimer(this, 100);
             waiting = true;
