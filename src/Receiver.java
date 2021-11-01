@@ -51,27 +51,27 @@ public class Receiver extends TransportLayer{
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         System.out.println("Waiting for: " + waitsFor);
-        //assign local packet to the arriving packet
+        if (pkt.getData() == lastDataSent){
+            System.out.println("Already sent this data to application");
+            this.packet = pkt;
+            TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData());
+            simulator.sendToNetworkLayer(this,sndpkt);
+
+        }
         if (!isCorrupted(pkt.getData(), pkt.getChecksum()) &&
                 pkt.getSeqnum() == waitsFor) {
+            //assign local packet to the arriving packet
             this.packet = pkt;
-            TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData(), packet.getChecksum());
+            TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData());
             simulator.sendToNetworkLayer(this, sndpkt);
             rdt_send(pkt.getData()); //we sent the packet ot the application layer
             waitsFor = switchNum(waitsFor); //we wait for the next packet with seq number - 1
         }
         else if(isCorrupted(pkt.getData(),pkt.getChecksum()) || pkt.getSeqnum() != waitsFor){
-            TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getSeqnum(), switchNum(waitsFor), pkt.getData(), pkt.getChecksum());
+            TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getSeqnum(), switchNum(waitsFor), pkt.getData());
             simulator.sendToNetworkLayer(this, sndpkt);
             System.out.println("Send back " + Arrays.toString(pkt.getData()));
             System.out.println("Receiver: rdt_receive case corrupted or not matching " + waitsFor);
-        }
-        if (pkt.getData() == lastDataSent){
-            System.out.println("Already sent this data to application");
-            this.packet = pkt;
-            TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData(), packet.getChecksum());
-            simulator.sendToNetworkLayer(this,sndpkt);
-
         }
     }
 
