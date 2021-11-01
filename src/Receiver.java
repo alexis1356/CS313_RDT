@@ -13,16 +13,21 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void init() {
+        System.out.println("Receiver: init");
         expectedSeqnum=0;
-        packet = new TransportLayerPacket (0,0 ,null, (byte)0);
+//        packet = new TransportLayerPacket (0,0 ,null);
     }
 
     @Override
     public void rdt_send(byte[] data) {
-        if (packet.getSeqnum()  == expectedSeqnum) {
-            simulator.sendToApplicationLayer(this, data);
-            System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
+        System.out.println("Receiver: rdt_send");
+        if (packet != null) {
+            if (packet.getSeqnum()  == expectedSeqnum) {
+                simulator.sendToApplicationLayer(this, data);
+                System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
+            }
         }
+
         //expectedSeqnum =0;
         //packet = new TransportLayerPacket (0,packet.getAcknum(),packet.getData(), packet.getChecksum());
     }
@@ -40,7 +45,7 @@ public class Receiver extends TransportLayer{
         }
         else
             System.out.println("Receiver: total sum corrupted " + sum);
-            return true;
+        return true;
     }//
 
     private int switchNum(int num) {
@@ -53,19 +58,19 @@ public class Receiver extends TransportLayer{
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         //assign local packet to the arriving packet
-            if (!isCorrupted(pkt.getData(), pkt.getChecksum()) && pkt.getSeqnum() == expectedSeqnum) {
-                rdt_send(pkt.getData()); //we sent the packet ot the application layer
-                this.packet = pkt;
-                sndpkt = new TransportLayerPacket(expectedSeqnum, expectedSeqnum, packet.getData(), packet.getChecksum());
-                simulator.sendToNetworkLayer(this, sndpkt);
-                expectedSeqnum++;
-            } else if (isCorrupted(pkt.getData(), pkt.getChecksum()) || pkt.getSeqnum() != expectedSeqnum) {
-                sndpkt = new TransportLayerPacket(pkt.getSeqnum(), expectedSeqnum, pkt.getData(), pkt.getChecksum());
-                simulator.sendToNetworkLayer(this, sndpkt);
-                System.out.println("Send back " + Arrays.toString(pkt.getData()));
-                System.out.println("Receiver: rdt_receive case corrupted or not matching " + expectedSeqnum);
-            }
+        if (!isCorrupted(pkt.getData(), pkt.getChecksum()) && pkt.getSeqnum() == expectedSeqnum) {
+            rdt_send(pkt.getData()); //we sent the packet ot the application layer
+            this.packet = pkt;
+            sndpkt = new TransportLayerPacket(expectedSeqnum, expectedSeqnum, packet.getData());
+            simulator.sendToNetworkLayer(this, sndpkt);
+            expectedSeqnum++;
+        } else if (isCorrupted(pkt.getData(), pkt.getChecksum()) || pkt.getSeqnum() != expectedSeqnum) {
+            sndpkt = new TransportLayerPacket(pkt.getSeqnum(), expectedSeqnum, pkt.getData());
+            simulator.sendToNetworkLayer(this, sndpkt);
+            System.out.println("Send back " + Arrays.toString(pkt.getData()));
+            System.out.println("Receiver: rdt_receive case corrupted or not matching " + expectedSeqnum);
         }
+    }
 
 
     @Override

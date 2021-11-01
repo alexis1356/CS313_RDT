@@ -5,37 +5,40 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Sender extends TransportLayer {
-    private TransportLayerPacket packet[] = new TransportLayerPacket[5];
-    private int seqnum =0;
-    private int base =0;
-    private int nextSeqnum=0;
-    private final int n = 3; // window size
-    private Queue<byte[]> allData = new LinkedList<>();
+    private TransportLayerPacket packet[] = new TransportLayerPacket[3];
+    private int base;
+    private int nextSeqnum;
+    private final int n = 2; // window size
+    private Queue<byte[]> allData;
 
     public Sender(String name, NetworkSimulator simulator) {
         super(name, simulator);
+
     }
 
     @Override
     public void init() {
-        seqnum = 0;
-
+        base = 0;
+        nextSeqnum = 0;
+        allData = new LinkedList<>();
+        System.out.println("Sender: init");
     }
-//
+
     @Override
     public void rdt_send(byte[] data) {
         //save the data - losing packets TODO: ask if it is needed
         //send the 1st or next packet
         System.out.println("Next Seqnum: "+ nextSeqnum + " Base: " + base);
-        if (nextSeqnum<base+n) {
+        if (nextSeqnum < base + n) {
             //calculates checksum
             byte sum = checksum(data);
             System.out.println("Sender: checksum " + sum);
             //creates the packet and assigns for 1st package a seq number 0
-            packet[nextSeqnum] = new TransportLayerPacket(nextSeqnum,nextSeqnum, data, sum);
-            //sending the packet to the network layer
-            printArray(packet);
+            packet[nextSeqnum] = new TransportLayerPacket(nextSeqnum,nextSeqnum, data);
             System.out.println("Sender: initial sending " + Arrays.toString(packet[nextSeqnum].getData()));
+            //sending the packet to the network layer
+            simulator.sendToNetworkLayer(this, packet[nextSeqnum]);
+//            printArray(packet);
             System.out.println("Sender: " + nextSeqnum);
             //start timer
             if (base == nextSeqnum) {
@@ -43,12 +46,14 @@ public class Sender extends TransportLayer {
             }
             nextSeqnum++;
         } else{
-            simulator.sendToApplicationLayer(this, data);
+//            simulator.sendToApplicationLayer(this, data);
+            allData.add(data);
+            System.out.println("Sender: allData " + allData);
         }
     }
 
     private void printArray(TransportLayerPacket[] pkt){
-        for (int i=0; i<pkt.length; i++){
+        for (int i=0; i < pkt.length; i++){
             System.out.println(i + " : " + pkt[i]);
         }
     }
@@ -63,31 +68,26 @@ public class Sender extends TransportLayer {
         return sum;
     }
 
-    private int switchNum(int num) {
-        if (num == 0)
-            return 1;
-        else
-            return 0;
-    }
-
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         //getAckNum should be the one that the receiver was waiting for and acknowledges it
-     if (!isCorrupted(pkt.getChecksum())) {
+        if (!isCorrupted(pkt.getChecksum())) {
             base = pkt.getAcknum()+1;
-         System.out.println("Base updating: " + base);
+            System.out.println("Base updating: " + base);
+            simulator.stopTimer(this);
             if (base==nextSeqnum) {
-                simulator.stopTimer(this);
+//                simulator.stopTimer(this);
             }
             else {
+//                simulator.stopTimer(this);
                 simulator.startTimer(this, 100);
             }
             System.out.println("Sender: " + Arrays.toString(pkt.getData()));
-            System.out.println("Sender: stop timer and switch seqnum to " + seqnum + " in rdt_receive.");
             System.out.println("______________________________");
-            //if (!allData.isEmpty()) {
-              //  rdt_send(allData.poll());
-           // }
+            if (!allData.isEmpty()) {
+                System.out.println("Sender: poll ");
+              rdt_send(allData.poll());
+             }
         }
     }
 
