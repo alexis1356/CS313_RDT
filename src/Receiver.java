@@ -50,6 +50,12 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
+        if (pkt.getData() == lastDataSent) {
+            System.out.println("Already sent this data to application");
+            this.packet = pkt;
+            TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData());
+            simulator.sendToNetworkLayer(this, sndpkt);
+        }
         System.out.println("Waiting for: " + waitsFor);
         if (pkt.getData() == lastDataSent){
             System.out.println("Already sent this data to application");

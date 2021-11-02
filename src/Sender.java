@@ -31,7 +31,7 @@ public class Sender extends TransportLayer {
             byte sum = checksum(data);
             System.out.println("Sender: checksum " + sum);
             //creates the packet and assigns for 1st package a seq number 0
-            this.packet = new TransportLayerPacket(seqnum, data, sum);
+            this.packet = new TransportLayerPacket(seqnum, data);
             //sending the packet to the network layer
             simulator.sendToNetworkLayer(this, packet);
             System.out.println("Sender: initial sending " + Arrays.toString(packet.getData()));
