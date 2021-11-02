@@ -22,10 +22,10 @@ public class Receiver extends TransportLayer{
     public void rdt_send(byte[] data) {
         System.out.println("Receiver: rdt_send");
         if (packet != null) {
-            if (packet.getSeqnum()  == expectedSeqnum) {
+//            if (packet.getSeqnum()  == expectedSeqnum) {
                 simulator.sendToApplicationLayer(this, data);
                 System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
-            }
+//            }
         }
 
         //expectedSeqnum =0;
@@ -46,13 +46,6 @@ public class Receiver extends TransportLayer{
         else
             System.out.println("Receiver: total sum corrupted " + sum);
         return true;
-    }//
-
-    private int switchNum(int num) {
-        if (num == 0)
-            return 1;
-        else
-            return 0;
     }
 
     @Override
@@ -65,10 +58,10 @@ public class Receiver extends TransportLayer{
             simulator.sendToNetworkLayer(this, sndpkt);
             expectedSeqnum++;
         } else if (isCorrupted(pkt.getData(), pkt.getChecksum()) || pkt.getSeqnum() != expectedSeqnum) {
-            sndpkt = new TransportLayerPacket(pkt.getSeqnum(), expectedSeqnum, pkt.getData());
+            sndpkt = new TransportLayerPacket(pkt.getSeqnum(), expectedSeqnum - 1, pkt.getData());
             simulator.sendToNetworkLayer(this, sndpkt);
             System.out.println("Send back " + Arrays.toString(pkt.getData()));
-            System.out.println("Receiver: rdt_receive case corrupted or not matching " + expectedSeqnum);
+            System.out.println("Receiver: rdt_receive case corrupted or not matching " + (expectedSeqnum - 1));
         }
     }
 

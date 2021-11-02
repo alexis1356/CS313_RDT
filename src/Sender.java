@@ -1,11 +1,13 @@
 package src;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Sender extends TransportLayer {
-    private TransportLayerPacket packet[] = new TransportLayerPacket[3];
+//    private TransportLayerPacket packet[] = new TransportLayerPacket[3];
+    private ArrayList<TransportLayerPacket> packet = new ArrayList<>();
     private int base;
     private int nextSeqnum;
     private final int n = 2; // window size
@@ -13,7 +15,6 @@ public class Sender extends TransportLayer {
 
     public Sender(String name, NetworkSimulator simulator) {
         super(name, simulator);
-
     }
 
     @Override
@@ -34,10 +35,10 @@ public class Sender extends TransportLayer {
             byte sum = checksum(data);
             System.out.println("Sender: checksum " + sum);
             //creates the packet and assigns for 1st package a seq number 0
-            packet[nextSeqnum] = new TransportLayerPacket(nextSeqnum,nextSeqnum, data);
-            System.out.println("Sender: initial sending " + Arrays.toString(packet[nextSeqnum].getData()));
+            packet.add(nextSeqnum, new TransportLayerPacket(nextSeqnum,nextSeqnum, data));
+            System.out.println("Sender: initial sending " + Arrays.toString(packet.get(nextSeqnum).getData()));
             //sending the packet to the network layer
-            simulator.sendToNetworkLayer(this, packet[nextSeqnum]);
+            simulator.sendToNetworkLayer(this, packet.get(nextSeqnum));
 //            printArray(packet);
             System.out.println("Sender: " + nextSeqnum);
             //start timer
@@ -49,12 +50,6 @@ public class Sender extends TransportLayer {
 //            simulator.sendToApplicationLayer(this, data);
             allData.add(data);
             System.out.println("Sender: allData " + allData);
-        }
-    }
-
-    private void printArray(TransportLayerPacket[] pkt){
-        for (int i=0; i < pkt.length; i++){
-            System.out.println(i + " : " + pkt[i]);
         }
     }
 
@@ -71,8 +66,8 @@ public class Sender extends TransportLayer {
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
         //getAckNum should be the one that the receiver was waiting for and acknowledges it
-        if (!isCorrupted(pkt.getChecksum())) {
-            base = pkt.getAcknum()+1;
+        if (!isCorrupted(pkt.getChecksum(), pkt)) {
+            base = pkt.getAcknum() + 1;
             System.out.println("Base updating: " + base);
             simulator.stopTimer(this);
             if (base==nextSeqnum) {
@@ -91,8 +86,11 @@ public class Sender extends TransportLayer {
         }
     }
 
-    private boolean isCorrupted(byte receivedChecksum) {
-        if (receivedChecksum == packet[base].getChecksum()) {
+    private boolean isCorrupted(byte receivedChecksum, TransportLayerPacket pkt) {
+        if(base > n) {
+            return true;
+        }
+        if (receivedChecksum == packet.get(base).getChecksum() || pkt.getAcknum() >= 0) {
             System.out.println("Sender: checksum not corrupted ");
             return false;
         } else {
@@ -101,14 +99,12 @@ public class Sender extends TransportLayer {
         }
     }
 
-
-
     @Override
     public void timerInterrupt() {
         simulator.startTimer(this, 100);
         for (int i = base; i < nextSeqnum; i++){
-            simulator.sendToNetworkLayer(this, packet[i]);
-            System.out.println("Sender: timeout, resend " + packet[i]);
+            simulator.sendToNetworkLayer(this, packet.get(i));
+            System.out.println("Sender: timeout, resend " + packet.get(i));
         }
     }
 }
