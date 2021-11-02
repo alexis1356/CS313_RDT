@@ -69,12 +69,10 @@ public class Sender extends TransportLayer {
         if (!isCorrupted(pkt.getChecksum(), pkt)) {
             base = pkt.getAcknum() + 1;
             System.out.println("Base updating: " + base);
-            simulator.stopTimer(this);
             if (base==nextSeqnum) {
-//                simulator.stopTimer(this);
+                simulator.stopTimer(this);
             }
             else {
-//                simulator.stopTimer(this);
                 simulator.startTimer(this, 100);
             }
             System.out.println("Sender: " + Arrays.toString(pkt.getData()));
@@ -90,7 +88,7 @@ public class Sender extends TransportLayer {
         if(base > n) {
             return true;
         }
-        if (receivedChecksum == packet.get(base).getChecksum() || pkt.getAcknum() >= 0) {
+        if (receivedChecksum == packet.get(base).getChecksum() && pkt.getAcknum() >= 0) {
             System.out.println("Sender: checksum not corrupted ");
             return false;
         } else {
