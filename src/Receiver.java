@@ -14,22 +14,13 @@ public class Receiver extends TransportLayer{
     @Override
     public void init() {
         System.out.println("Receiver: init");
-        expectedSeqnum=0;
-//        packet = new TransportLayerPacket (0,0 ,null);
+        expectedSeqnum = 0;
     }
 
     @Override
     public void rdt_send(byte[] data) {
-        System.out.println("Receiver: rdt_send");
-        if (packet != null) {
-//            if (packet.getSeqnum()  == expectedSeqnum) {
-                simulator.sendToApplicationLayer(this, data);
-                System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
-//            }
-        }
-
-        //expectedSeqnum =0;
-        //packet = new TransportLayerPacket (0,packet.getAcknum(),packet.getData(), packet.getChecksum());
+        System.out.println("Receiver: SEND TO APPLICATION LAYER " + Arrays.toString(data));
+        simulator.sendToApplicationLayer(this, data);
     }
 
     private boolean isCorrupted(byte[] data, byte checksum){
@@ -60,8 +51,8 @@ public class Receiver extends TransportLayer{
         } else if (isCorrupted(pkt.getData(), pkt.getChecksum()) || pkt.getSeqnum() != expectedSeqnum) {
             sndpkt = new TransportLayerPacket(pkt.getSeqnum(), expectedSeqnum - 1, pkt.getData());
             simulator.sendToNetworkLayer(this, sndpkt);
-            System.out.println("Send back " + Arrays.toString(pkt.getData()));
-            System.out.println("Receiver: rdt_receive case corrupted or not matching " + (expectedSeqnum - 1));
+            System.out.println("Receiver: Send back " + Arrays.toString(pkt.getData()));
+            System.out.println("Receiver: rdt_receive case corrupted or not matching ackNum " + (expectedSeqnum - 1));
         }
     }
 

@@ -29,7 +29,7 @@ public class Sender extends TransportLayer {
     public void rdt_send(byte[] data) {
         //save the data - losing packets TODO: ask if it is needed
         //send the 1st or next packet
-        System.out.println("Next Seqnum: "+ nextSeqnum + " Base: " + base);
+        System.out.println("Sender: Next Seqnum: "+ nextSeqnum + " Base: " + base);
         if (nextSeqnum < base + n) {
             //calculates checksum
             byte sum = checksum(data);
@@ -40,7 +40,7 @@ public class Sender extends TransportLayer {
             //sending the packet to the network layer
             simulator.sendToNetworkLayer(this, packet.get(nextSeqnum));
 //            printArray(packet);
-            System.out.println("Sender: " + nextSeqnum);
+            System.out.println("Sender: nextSeqnum " + nextSeqnum);
             //start timer
             if (base == nextSeqnum) {
                 simulator.startTimer(this, 100);
@@ -68,11 +68,12 @@ public class Sender extends TransportLayer {
         //getAckNum should be the one that the receiver was waiting for and acknowledges it
         if (!isCorrupted(pkt.getChecksum(), pkt)) {
             base = pkt.getAcknum() + 1;
-            System.out.println("Base updating: " + base);
+            System.out.println("Sender: Base updating: " + base);
             if (base==nextSeqnum) {
                 simulator.stopTimer(this);
             }
             else {
+                simulator.stopTimer(this);
                 simulator.startTimer(this, 100);
             }
             System.out.println("Sender: " + Arrays.toString(pkt.getData()));
@@ -85,10 +86,10 @@ public class Sender extends TransportLayer {
     }
 
     private boolean isCorrupted(byte receivedChecksum, TransportLayerPacket pkt) {
-        if(base > n) {
-            return true;
-        }
-        if (receivedChecksum == packet.get(base).getChecksum() && pkt.getAcknum() >= 0) {
+//        if(base > n) {
+//            return true;
+//        }
+        if (base <= n && receivedChecksum == packet.get(base).getChecksum() && pkt.getAcknum() >= 0) {
             System.out.println("Sender: checksum not corrupted ");
             return false;
         } else {
