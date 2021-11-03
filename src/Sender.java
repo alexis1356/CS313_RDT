@@ -31,11 +31,10 @@ public class Sender extends TransportLayer {
         //send the 1st or next packet
         System.out.println("Sender: Next Seqnum: "+ nextSeqnum + " Base: " + base);
         if (nextSeqnum < base + n) {
-            //calculates checksum
-            byte sum = checksum(data);
-            System.out.println("Sender: checksum " + sum);
             //creates the packet and assigns for 1st package a seq number 0
             packet.add(nextSeqnum, new TransportLayerPacket(nextSeqnum,nextSeqnum, data));
+            //prints checksum and data
+            System.out.println("Sender: checksum " + packet.get(nextSeqnum).getChecksum());
             System.out.println("Sender: initial sending " + Arrays.toString(packet.get(nextSeqnum).getData()));
             //sending the packet to the network layer
             simulator.sendToNetworkLayer(this, packet.get(nextSeqnum));
@@ -51,16 +50,6 @@ public class Sender extends TransportLayer {
             allData.add(data);
             System.out.println("Sender: allData " + allData);
         }
-    }
-
-    private byte checksum(byte[] data) {
-        //calculate checksum
-        byte sum = 0;
-        for (int i = 0; i < data.length; i++) {
-            sum += data[i];
-        }
-        sum ^= 0xFFFFFFFF;
-        return sum;
     }
 
     @Override
