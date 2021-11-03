@@ -79,12 +79,12 @@ public class Sender extends TransportLayer {
     }
 
     private boolean inOrderData(byte[] recievedData){
-        byte[] orginalData = packet.getData();
-        if (recievedData.length != orginalData.length){
+        byte[] orignalData = packet.getData();
+        if (recievedData.length != orignalData.length){
             return false;
         }
         for (int i=0; i<recievedData.length; i++){
-            if (recievedData[i] != orginalData[i]){
+            if (recievedData[i] != orignalData[i]){
                 return false;
             }
         }

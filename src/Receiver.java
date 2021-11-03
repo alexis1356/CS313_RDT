@@ -5,7 +5,6 @@ import java.util.Arrays;
 public class Receiver extends TransportLayer{
     private TransportLayerPacket packet;
     private int waitsFor;
-    private byte[] lastDataSent;
 
     public Receiver(String name, NetworkSimulator simulator) {
         super(name, simulator);
@@ -20,7 +19,6 @@ public class Receiver extends TransportLayer{
     public void rdt_send(byte[] data) {
         if (packet.getSeqnum() == waitsFor) {
             simulator.sendToApplicationLayer(this, data);
-            lastDataSent = data;
             System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
         }
     }
@@ -50,20 +48,7 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        if (pkt.getData() == lastDataSent) {
-            System.out.println("Already sent this data to application");
-            this.packet = pkt;
-            TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData());
-            simulator.sendToNetworkLayer(this, sndpkt);
-        }
         System.out.println("Waiting for: " + waitsFor);
-        if (pkt.getData() == lastDataSent){
-            System.out.println("Already sent this data to application");
-            this.packet = pkt;
-            TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData());
-            simulator.sendToNetworkLayer(this,sndpkt);
-
-        }
         if (!isCorrupted(pkt.getData(), pkt.getChecksum()) &&
                 pkt.getSeqnum() == waitsFor) {
             //assign local packet to the arriving packet
