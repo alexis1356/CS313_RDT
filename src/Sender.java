@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Sender extends TransportLayer {
-//    private TransportLayerPacket packet[] = new TransportLayerPacket[3];
+    //    private TransportLayerPacket packet[] = new TransportLayerPacket[3];
     private ArrayList<TransportLayerPacket> packet = new ArrayList<>();
     private int base;
     private int nextSeqnum;
@@ -69,16 +69,13 @@ public class Sender extends TransportLayer {
             System.out.println("______________________________");
             if (!allData.isEmpty()) {
                 System.out.println("Sender: poll ");
-              rdt_send(allData.poll());
-             }
+                rdt_send(allData.poll());
+            }
         }
     }
 
     private boolean isCorrupted(byte receivedChecksum, TransportLayerPacket pkt) {
-//        if(base > n) {
-//            return true;
-//        }
-        if (base <= n && receivedChecksum == packet.get(base).getChecksum() && pkt.getAcknum() >= 0) {
+        if (base < packet.size() && receivedChecksum == packet.get(base).getChecksum() && pkt.getAcknum() >= 0) {
             System.out.println("Sender: checksum not corrupted ");
             return false;
         } else {
