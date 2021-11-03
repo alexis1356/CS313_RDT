@@ -27,11 +27,10 @@ public class Sender extends TransportLayer {
         //save the data - losing packets TODO: ask if it is needed
         //send the 1st or next packet
         if (!waiting) {
-            //calculates checksum
-            byte sum = checksum(data);
-            System.out.println("Sender: checksum " + sum);
             //creates the packet and assigns for 1st package a seq number 0
             this.packet = new TransportLayerPacket(seqnum, data);
+            //calculates checksum
+            System.out.println("Sender: checksum " + packet.getChecksum());
             //sending the packet to the network layer
             simulator.sendToNetworkLayer(this, packet);
             System.out.println("Sender: initial sending " + Arrays.toString(packet.getData()));
@@ -43,16 +42,6 @@ public class Sender extends TransportLayer {
             //if it is waiting it adds the new data to a queue that will be sent later
             allData.add(data);
         }
-    }
-
-    private byte checksum(byte[] data) {
-        //calculate checksum
-        byte sum = 0;
-        for (int i = 0; i < data.length; i++) {
-            sum += data[i];
-        }
-        sum ^= 0xFFFFFFFF;
-        return sum;
     }
 
     private int switchNum(int num) {

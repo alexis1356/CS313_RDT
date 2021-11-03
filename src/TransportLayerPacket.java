@@ -6,7 +6,6 @@ public class TransportLayerPacket {
     // You may need extra fields
     private int seqnum;
     private int acknum;
-
     byte[] data;
     byte checksum;
 

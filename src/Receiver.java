@@ -55,7 +55,7 @@ public class Receiver extends TransportLayer{
             this.packet = pkt;
             TransportLayerPacket sndpkt = new TransportLayerPacket(packet.getSeqnum(), waitsFor, packet.getData());
             simulator.sendToNetworkLayer(this, sndpkt);
-            rdt_send(pkt.getData()); //we sent the packet ot the application layer
+            rdt_send(pkt.getData()); //we sent the packet to the application layer
             waitsFor = switchNum(waitsFor); //we wait for the next packet with seq number - 1
         }
         else if(isCorrupted(pkt.getData(),pkt.getChecksum()) || pkt.getSeqnum() != waitsFor){
