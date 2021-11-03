@@ -30,11 +30,11 @@ public class Sender extends TransportLayer {
             //creates the packet and assigns for 1st package a seq number 0
             this.packet = new TransportLayerPacket(seqnum, data);
             //calculates checksum
-            System.out.println("Sender: checksum " + packet.getChecksum());
+            //System.out.println("Sender: checksum " + packet.getChecksum());
             //sending the packet to the network layer
             simulator.sendToNetworkLayer(this, packet);
-            System.out.println("Sender: initial sending " + Arrays.toString(packet.getData()));
-            System.out.println("Seqnum of: " +packet.getSeqnum());
+            //System.out.println("Sender: initial sending " + Arrays.toString(packet.getData()));
+            //System.out.println("Seqnum of: " +packet.getSeqnum());
             //start timer
             simulator.startTimer(this, 100);
             waiting = true;
@@ -58,9 +58,9 @@ public class Sender extends TransportLayer {
             simulator.stopTimer(this);
             seqnum = switchNum(seqnum);
             waitsFor = switchNum(waitsFor);
-            System.out.println("Sender: stop timer and switch seqnum to " + seqnum + " in rdt_receive.");
+            //System.out.println("Sender: stop timer and switch seqnum to " + seqnum + " in rdt_receive.");
             waiting = false;
-            System.out.println("______________________________");
+            //System.out.println("______________________________");
             if (!allData.isEmpty()) {
                 rdt_send(allData.poll());
             }
@@ -82,10 +82,10 @@ public class Sender extends TransportLayer {
 
     private boolean isCorrupted(byte receivedChecksum) {
         if (receivedChecksum == packet.getChecksum()) {
-            System.out.println("Sender: checksum not corrupted ");
+            //System.out.println("Sender: checksum not corrupted ");
             return false;
         } else {
-            System.out.println("Sender: checksum corrupted ");
+            //System.out.println("Sender: checksum corrupted ");
             return true;
         }
     }
@@ -93,7 +93,7 @@ public class Sender extends TransportLayer {
     @Override
     public void timerInterrupt() {
         simulator.sendToNetworkLayer(this, packet);
-        System.out.println("Sender: timeout, resend " + packet);
+        //System.out.println("Sender: timeout, resend " + packet);
         simulator.startTimer(this, 100);
     }
 }

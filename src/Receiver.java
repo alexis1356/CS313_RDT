@@ -19,7 +19,7 @@ public class Receiver extends TransportLayer{
     public void rdt_send(byte[] data) {
         if (packet.getSeqnum() == waitsFor) {
             simulator.sendToApplicationLayer(this, data);
-            System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
+            //System.out.println("Receiver: Send to application layer " + Arrays.toString(data));
         }
     }
 
@@ -28,14 +28,14 @@ public class Receiver extends TransportLayer{
         for (int i = 0; i < data.length; i++) {
             sum += data[i];
         }
-        System.out.println("Receiver checksum: " + sum);
+       // System.out.println("Receiver checksum: " + sum);
         sum += checksum;
         if(sum == 0xFFFFFFFF){
-            System.out.println("Receiver: total sum not corrupted " + sum);
+            //System.out.println("Receiver: total sum not corrupted " + sum);
             return false;
         }
         else
-            System.out.println("Receiver: total sum corrupted " + sum);
+           // System.out.println("Receiver: total sum corrupted " + sum);
         return true;
     }
 
@@ -48,7 +48,7 @@ public class Receiver extends TransportLayer{
 
     @Override
     public void rdt_receive(TransportLayerPacket pkt) {
-        System.out.println("Waiting for: " + waitsFor);
+        //System.out.println("Waiting for: " + waitsFor);
         if (!isCorrupted(pkt.getData(), pkt.getChecksum()) &&
                 pkt.getSeqnum() == waitsFor) {
             //assign local packet to the arriving packet
@@ -61,8 +61,8 @@ public class Receiver extends TransportLayer{
         else if(isCorrupted(pkt.getData(),pkt.getChecksum()) || pkt.getSeqnum() != waitsFor){
             TransportLayerPacket sndpkt = new TransportLayerPacket(pkt.getSeqnum(), switchNum(waitsFor), pkt.getData());
             simulator.sendToNetworkLayer(this, sndpkt);
-            System.out.println("Send back " + Arrays.toString(pkt.getData()));
-            System.out.println("Receiver: rdt_receive case corrupted or not matching " + waitsFor);
+            //System.out.println("Send back " + Arrays.toString(pkt.getData()));
+            //System.out.println("Receiver: rdt_receive case corrupted or not matching " + waitsFor);
         }
     }
 
