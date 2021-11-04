@@ -27,7 +27,6 @@ public class Sender extends TransportLayer {
 
     @Override
     public void rdt_send(byte[] data) {
-        //save the data - losing packets TODO: ask if it is needed
         //send the 1st or next packet
         System.out.println("Sender: Next Seqnum: "+ nextSeqnum + " Base: " + base);
         if (nextSeqnum < base + n) {
